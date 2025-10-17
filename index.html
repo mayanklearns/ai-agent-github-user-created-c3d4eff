@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GitHub User Account Creation Date Finder - Fetch and display when a GitHub user account was created">
+    <title>GitHub User Created Date Finder</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="text-center my-5">
+            <h1 class="display-4 mb-3">GitHub User Created Date Finder</h1>
+            <p class="lead text-muted">Enter a GitHub username to discover when their account was created</p>
+        </header>
+
+        <main>
+            <!-- Form Section with Required ID -->
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-8 col-lg-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <form id="github-user-23f3004197" class="needs-validation" novalidate>
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">GitHub Username</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="username" 
+                                        name="username"
+                                        placeholder="e.g., octocat" 
+                                        required
+                                        autocomplete="off">
+                                    <div class="invalid-feedback">
+                                        Please enter a GitHub username.
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100" id="submit-btn">
+                                    <span id="btn-text">Fetch User Info</span>
+                                    <span id="btn-spinner" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Info about token -->
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i> 
+                            Optional: Add <code>?token=YOUR_GITHUB_TOKEN</code> to the URL to increase API rate limits
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <!-- Error Message -->
+                    <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+                    
+                    <!-- User Info Card -->
+                    <div id="user-card" class="card shadow-sm d-none">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <img id="user-avatar" src="" alt="User avatar" class="rounded-circle" width="80" height="80">
+                                </div>
+                                <div class="col">
+                                    <h5 class="card-title mb-1" id="user-name"></h5>
+                                    <p class="text-muted mb-0" id="user-login"></p>
+                                </div>
+                            </div>
+                            
+                            <hr class="my-3">
+                            
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2">Account Created Date (UTC)</h6>
+                                <!-- Required element ID for evaluation -->
+                                <p class="fs-4 fw-bold text-primary mb-0" id="github-created-at"></p>
+                            </div>
+                            
+                            <div id="user-bio-container" class="mb-3 d-none">
+                                <h6 class="text-muted mb-2">Bio</h6>
+                                <p id="user-bio" class="mb-0"></p>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <a id="user-profile-link" href="" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
+                                    Visit GitHub Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-5 mb-4">
+            <p class="text-muted">
+                <small>Powered by <a href="https://docs.github.com/en/rest/users/users" target="_blank" rel="noopener noreferrer">GitHub API</a></small>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
