@@ -1,6 +1,7 @@
 /**
  * GitHub User Created Date Finder
  * Fetches GitHub user data and displays account creation date in YYYY-MM-DD UTC format
+ * Round 2 Update: Added aria-live status updates for accessibility
  */
 
 // Global variables
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.userBio = document.getElementById('user-bio');
     elements.userBioContainer = document.getElementById('user-bio-container');
     elements.userProfileLink = document.getElementById('user-profile-link');
+    elements.githubStatus = document.getElementById('github-status'); // NEW: Round 2
     
     // Add form submit event listener
     elements.form.addEventListener('submit', handleFormSubmit);
@@ -59,13 +61,25 @@ async function handleFormSubmit(event) {
     // Set loading state
     setLoadingState(true);
     
+    // NEW: Show status that lookup has started
+    updateStatus(`Looking up GitHub user "${username}"...`, 'info');
+    
     try {
         // Fetch user data from GitHub API
         const userData = await fetchGitHubUser(username);
         
         // Display the results
         displayUserData(userData);
+        
+        // NEW: Show success status
+        updateStatus(`Successfully found user "${username}"`, 'success');
+        
+        // Auto-hide success message after 3 seconds
+        setTimeout(() => hideStatus(), 3000);
     } catch (error) {
+        // NEW: Show error status
+        updateStatus(`Failed to find user: ${error.message}`, 'danger');
+        
         showError(error.message);
     } finally {
         setLoadingState(false);
@@ -177,6 +191,35 @@ function displayUserData(userData) {
     
     // Show the user card
     showUserCard();
+}
+
+/**
+ * NEW: Update the status message for accessibility (Round 2)
+ * This function updates the aria-live region to announce status changes to screen readers
+ * @param {string} message - Status message to display
+ * @param {string} type - Alert type: 'info', 'success', 'danger'
+ */
+function updateStatus(message, type = 'info') {
+    const statusElement = elements.githubStatus;
+    
+    // Update message
+    statusElement.textContent = message;
+    
+    // Update styling - remove all alert classes and add the new one
+    statusElement.className = `alert alert-${type}`;
+    
+    // Show the status element
+    // Note: We don't use d-none removal/addition to ensure aria-live works properly
+    statusElement.style.display = 'block';
+}
+
+/**
+ * NEW: Hide the status message (Round 2)
+ */
+function hideStatus() {
+    const statusElement = elements.githubStatus;
+    statusElement.style.display = 'none';
+    statusElement.textContent = '';
 }
 
 /**

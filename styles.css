@@ -113,6 +113,32 @@ header .lead {
     border: none;
 }
 
+/* NEW: Status element styling (Round 2) */
+#github-status {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+#github-status.alert-info {
+    background-color: #cfe2ff;
+    border: 1px solid #b6d4fe;
+    color: #084298;
+}
+
+#github-status.alert-success {
+    background-color: #d1e7dd;
+    border: 1px solid #badbcc;
+    color: #0f5132;
+}
+
+#github-status.alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c2c7;
+    color: #842029;
+}
+
 footer a {
     color: #ffffff;
     text-decoration: none;

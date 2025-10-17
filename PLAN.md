@@ -1,207 +1,256 @@
-# PROJECT PLAN: GitHub User Created Date Fetcher
+# PROJECT PLAN: GitHub User Created Date Fetcher - Round 2 Update
 
-## Mission Brief Analysis
-Create a Bootstrap-based web application that:
-1. Contains a form with ID `github-user-23f3004197`
-2. Fetches GitHub user data via API (https://api.github.com/users/)
-3. Displays account creation date in YYYY-MM-DD UTC format in element with ID `github-created-at`
-4. Optionally supports `?token=` query parameter for API authentication
+## Update Mission Brief Analysis
+**New Requirements (Round 2):**
+1. Show an aria-live alert `#github-status` that reports when a lookup starts, succeeds, or fails
+2. The element with ID 'github-status' must have an aria-live attribute set to 'polite'
+3. There must be a script on the page that references 'github-status'
 
-## Evaluation Criteria Compliance Checklist
-✅ **Criterion 1**: Form element with ID 'github-user-23f3004197' must exist
-✅ **Criterion 2**: Element with ID 'github-created-at' must contain date text (year starting with '20')
-✅ **Criterion 3**: Script must fetch from GitHub API (https://api.github.com/users/)
+**Existing Functionality to Preserve:**
+- Form with ID `github-user-23f3004197` ✅
+- Element with ID `github-created-at` displaying date ✅
+- GitHub API fetching from `https://api.github.com/users/` ✅
+- YYYY-MM-DD UTC date format ✅
+- Token authentication support ✅
+- All existing UI/UX features ✅
 
-## Architectural Vision
+## New Evaluation Criteria Compliance Checklist
+✅ **NEW Criterion 1**: Element with ID 'github-status' has aria-live attribute set to 'polite'
+✅ **NEW Criterion 2**: Script references 'github-status' and updates it with status messages
+✅ **EXISTING Criterion 1**: Form element with ID 'github-user-23f3004197' must exist
+✅ **EXISTING Criterion 2**: Element with ID 'github-created-at' must contain date text
+✅ **EXISTING Criterion 3**: Script must fetch from GitHub API
 
-### File Structure
+## Architectural Changes
+
+### Modified Files
+1. **index.html** - Add `#github-status` element with proper ARIA attributes
+2. **script.js** - Add functions to update status messages, integrate with existing flow
+3. **styles.css** - Add styling for the status message element (optional enhancement)
+4. **README.md** - Update documentation to reflect new accessibility feature
+
+### No Changes Required
+- LICENSE (unchanged)
+- preview.png (will be regenerated)
+
+## Component Strategy - HTML Changes
+
+### New Element: #github-status
+**Location**: Between the form card and results section, or above the form
+**Markup**:
+```html
+<div id="github-status" 
+     class="alert alert-info" 
+     role="status" 
+     aria-live="polite" 
+     aria-atomic="true">
+</div>
 ```
-/
-├── index.html          # Main application page
-├── script.js           # JavaScript logic for API fetching and DOM manipulation
-├── styles.css          # Custom CSS styles (minimal, Bootstrap-first approach)
-├── README.md           # Project documentation
-├── PLAN.md             # This file
-└── LICENSE             # MIT License (existing)
+
+**Rationale for Placement**:
+- Visually positioned so screen readers announce it appropriately
+- Use Bootstrap alert component for consistent styling
+- Initially hidden (d-none class) until there's a status to report
+
+**Accessibility Attributes**:
+- `aria-live="polite"`: Ensures screen readers announce changes without interrupting
+- `role="status"`: Indicates this is a status message
+- `aria-atomic="true"`: Announces the entire region when it updates
+
+## Styling Strategy - CSS Updates
+
+### Status Element Styling
+```css
+#github-status {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+#github-status.alert-info {
+    /* Loading state */
+    background-color: #cfe2ff;
+    border-color: #b6d4fe;
+}
+
+#github-status.alert-success {
+    /* Success state */
+    background-color: #d1e7dd;
+    border-color: #badbcc;
+}
+
+#github-status.alert-danger {
+    /* Error state */
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+}
 ```
 
-## Component Strategy
+**Design Decisions**:
+- Maintain consistency with existing card styling (border-radius)
+- Use Bootstrap's alert color scheme for familiarity
+- Add smooth transitions for professional feel
 
-### HTML Structure (index.html)
-1. **DOCTYPE & Head**:
-   - Bootstrap 5 CDN (CSS and JS)
-   - Custom CSS and JS file links
-   - Proper meta tags for responsive design
+## Logic & Interactivity Strategy - JavaScript Updates
 
-2. **Main Container**:
-   - Bootstrap container with centered layout
-   - Header with title and description
-   - Form section with ID `github-user-23f3004197`
-   - Results section with element ID `github-created-at`
+### 1. New DOM Element Reference
+Add to the `elements` object in DOMContentLoaded:
+```javascript
+elements.githubStatus = document.getElementById('github-status');
+```
 
-3. **Form Elements**:
-   - Input field for GitHub username (required)
-   - Submit button
-   - Bootstrap form controls for styling
+### 2. New Status Update Function
+```javascript
+/**
+ * Update the status message for accessibility
+ * @param {string} message - Status message to display
+ * @param {string} type - Alert type: 'info', 'success', 'danger'
+ */
+function updateStatus(message, type = 'info') {
+    const statusElement = elements.githubStatus;
+    
+    // Update message
+    statusElement.textContent = message;
+    
+    // Update styling
+    statusElement.className = `alert alert-${type}`;
+    
+    // Show the status element
+    statusElement.classList.remove('d-none');
+}
 
-4. **Results Display**:
-   - Card component to display results
-   - `#github-created-at` element to show the formatted date
-   - Additional user info for better UX (avatar, username, profile link)
-   - Error message display area
+/**
+ * Hide the status message
+ */
+function hideStatus() {
+    elements.githubStatus.classList.add('d-none');
+    elements.githubStatus.textContent = '';
+}
+```
 
-## Styling Strategy
+### 3. Integration Points in Existing Flow
 
-### Bootstrap 5 Approach
-- Use CDN: `https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css`
-- Leverage Bootstrap utilities for:
-  - Grid system (container, row, col)
-  - Form controls
-  - Cards
-  - Buttons
-  - Spacing (mt, mb, p, m classes)
-  - Typography
+#### A. When Lookup Starts (in handleFormSubmit)
+**Location**: After validation, before API call
+**Code**:
+```javascript
+// Show status: lookup started
+updateStatus(`Looking up GitHub user "${username}"...`, 'info');
+```
 
-### Custom CSS (styles.css)
-- Minimal custom styles for branding
-- Focus on user experience enhancements:
-  - Smooth transitions
-  - Loading states
-  - Error states
-  - Color scheme: Professional blues and grays
-- Layout: Centered card design with max-width for readability
+#### B. When Lookup Succeeds (in handleFormSubmit try block)
+**Location**: After displayUserData() call
+**Code**:
+```javascript
+// Show success status
+updateStatus(`Successfully found user "${username}"`, 'success');
 
-## Logic & Interactivity Strategy
+// Auto-hide success message after 3 seconds
+setTimeout(() => hideStatus(), 3000);
+```
 
-### JavaScript Architecture (script.js)
+#### C. When Lookup Fails (in handleFormSubmit catch block)
+**Location**: In the catch block, before showError()
+**Code**:
+```javascript
+// Show error status
+updateStatus(`Failed to find user "${username}": ${error.message}`, 'danger');
+```
 
-#### 1. **Initialization**
-- DOM content loaded event listener
-- Extract token from URL query parameter `?token=`
-- Cache DOM element references
+### 4. Edge Cases & Status Messages
 
-#### 2. **Form Submission Handler**
-- Prevent default form submission
-- Validate username input (not empty, trim whitespace)
-- Show loading state
-- Call API fetch function
+| Scenario | Status Message | Type |
+|----------|----------------|------|
+| Lookup starts | "Looking up GitHub user '{username}'..." | info |
+| User found | "Successfully found user '{username}'" | success |
+| User not found (404) | "Failed to find user '{username}': User not found" | danger |
+| Rate limit (403) | "Failed to find user '{username}': Rate limit exceeded" | danger |
+| Network error | "Failed to find user '{username}': Network error" | danger |
+| Empty input | No status update (validation prevents submission) | - |
 
-#### 3. **GitHub API Fetching**
-- **Function**: `fetchGitHubUser(username, token)`
-- **URL**: `https://api.github.com/users/${username}`
-- **Headers**: Include Authorization if token is provided
-- **Error Handling**:
-  - Network errors
-  - 404 (user not found)
-  - 403 (rate limit exceeded)
-  - Invalid responses
-- **Response Processing**:
-  - Extract `created_at` field
-  - Parse ISO 8601 date string
-  - Convert to UTC YYYY-MM-DD format
+### 5. Timing Considerations
+- **Start status**: Shown immediately when form is submitted
+- **Success status**: Shown immediately when data loads, auto-hides after 3s
+- **Error status**: Shown when error occurs, stays visible until next lookup
 
-#### 4. **Date Formatting**
-- **Function**: `formatDateToYYYYMMDD(isoString)`
-- Parse ISO 8601 date string
-- Extract year, month, day in UTC
-- Format as YYYY-MM-DD (e.g., "2023-01-15")
-- Zero-pad month and day
+## Accessibility Enhancement Benefits
 
-#### 5. **DOM Updates**
-- **Success**:
-  - Update `#github-created-at` with formatted date
-  - Display user avatar, username, bio
-  - Show profile link
-  - Hide error messages
-- **Error**:
-  - Display user-friendly error message
-  - Clear previous results
-  - Suggest solutions (check username, rate limits)
-
-#### 6. **Edge Cases Handling**
-- Empty username input
-- Whitespace-only input
-- Non-existent GitHub users
-- API rate limiting (especially without token)
-- Network failures
-- Malformed API responses
-- Missing `created_at` field
-
-### Query Parameter Handling
-- Parse `?token=YOUR_TOKEN` from URL
-- Use URLSearchParams API
-- Include in Authorization header: `token ${token}`
-
-## User Experience Flow
-
-1. **Initial State**:
-   - Clean form visible
-   - No results shown
-   - Placeholder text in input
-
-2. **User Input**:
-   - Enter GitHub username
-   - Click submit or press Enter
-
-3. **Loading State**:
-   - Disable form inputs
-   - Show loading spinner/text
-   - Button text changes to "Loading..."
-
-4. **Success State**:
-   - Display user card with:
-     - Avatar
-     - Username
-     - Account created date in `#github-created-at`
-     - Bio (if available)
-     - Link to GitHub profile
-   - Re-enable form for new search
-
-5. **Error State**:
-   - Show error message
-   - Clear previous results
-   - Re-enable form
-   - Keep entered username for retry
-
-## Security Considerations
-- Sanitize user input (prevent XSS)
-- Use textContent instead of innerHTML where possible
-- Validate API responses
-- Handle token securely (passed via URL parameter, not stored)
-
-## Accessibility
-- Proper form labels
-- ARIA attributes where needed
-- Semantic HTML elements
-- Keyboard navigation support
-- Focus management
-
-## Testing Strategy
-1. Test with valid GitHub username (e.g., "octocat")
-2. Test with invalid username
-3. Test with empty input
-4. Test without token (rate limit consideration)
-5. Verify date format is exactly YYYY-MM-DD UTC
-6. Verify all required IDs are present
-7. Verify GitHub API URL is correct
-
-## Deployment URLs (for README)
-- Repository: `https://github.com/mayanklearns/ai-agent-github-user-created-c3d4eff`
-- Live Demo: `https://mayanklearns.github.io/ai-agent-github-user-created-c3d4eff/`
-
-## Success Criteria Mapping
-
-| Criterion | Implementation | Verification |
-|-----------|----------------|--------------|
-| Form with ID 'github-user-23f3004197' | `<form id="github-user-23f3004197">` in index.html | Inspect HTML, analyze_code_quality |
-| Element with ID 'github-created-at' contains date | `<div id="github-created-at">` populated with YYYY-MM-DD format | Test with real API call, preview |
-| Script fetches from GitHub API | `fetch('https://api.github.com/users/${username}')` in script.js | Code review, console verification |
+1. **Screen Reader Support**: Users with visual impairments will hear status updates
+2. **ARIA Live Regions**: Polite announcements don't interrupt current tasks
+3. **Status Clarity**: Clear feedback for all lookup states
+4. **Semantic HTML**: Proper use of role="status" for assistive technologies
 
 ## Implementation Order
-1. Create index.html with structure and required IDs
-2. Create styles.css for visual polish
-3. Create script.js with API logic and date formatting
-4. Test with run_and_preview_application
-5. Create comprehensive README.md
-6. Final quality assurance
-7. Deploy verification
+
+1. ✅ **Review existing code** (Phase 1 - Complete)
+2. **Update index.html**:
+   - Add `#github-status` element with aria-live="polite"
+   - Position appropriately in layout
+3. **Update script.js**:
+   - Add `elements.githubStatus` reference
+   - Create `updateStatus()` function
+   - Create `hideStatus()` function
+   - Integrate status updates in `handleFormSubmit()`
+4. **Update styles.css**:
+   - Add status element styling (optional enhancement)
+5. **Test with run_and_preview_application**:
+   - Verify status messages appear correctly
+   - Test all three states (start, success, fail)
+   - Check console for errors
+6. **Update README.md**:
+   - Add section about accessibility features
+   - Document the new aria-live status updates
+7. **Final quality assurance**:
+   - Verify all existing functionality works
+   - Verify new evaluation criteria are met
+   - Run analyze_code_quality on all files
+
+## Testing Checklist
+
+### New Functionality
+- [ ] `#github-status` element exists in HTML
+- [ ] Element has `aria-live="polite"` attribute
+- [ ] Element has `role="status"` attribute
+- [ ] Script references `#github-status` by ID
+- [ ] Status shows "Looking up..." when search starts
+- [ ] Status shows "Successfully found..." when user is found
+- [ ] Status shows "Failed to find..." when error occurs
+- [ ] Success message auto-hides after 3 seconds
+
+### Existing Functionality Regression Tests
+- [ ] Form ID is still `github-user-23f3004197`
+- [ ] Date element ID is still `github-created-at`
+- [ ] Date format is still YYYY-MM-DD UTC
+- [ ] GitHub API URL is still correct
+- [ ] Token authentication still works
+- [ ] All error handling still works
+- [ ] UI/UX is still smooth and professional
+
+## Success Criteria Verification
+
+| New Criterion | Implementation | Verification Method |
+|---------------|----------------|---------------------|
+| Element ID 'github-status' exists | `<div id="github-status">` in HTML | analyze_code_quality, visual inspection |
+| Has aria-live="polite" | `aria-live="polite"` attribute | analyze_code_quality, HTML validation |
+| Script references 'github-status' | `document.getElementById('github-status')` in JS | Code search, analyze_code_quality |
+| Status updates on lookup start | `updateStatus()` call in handleFormSubmit | Manual testing, preview |
+| Status updates on success | `updateStatus()` call after data display | Manual testing, preview |
+| Status updates on failure | `updateStatus()` call in catch block | Manual testing with invalid username |
+
+## Deployment URLs
+- **Repository**: `https://github.com/mayanklearns/ai-agent-github-user-created-c3d4eff`
+- **Live Demo**: `https://mayanklearns.github.io/ai-agent-github-user-created-c3d4eff/`
+
+## Code Quality Standards
+- Maintain existing code style and conventions
+- Add clear comments for new functions
+- Keep variable naming consistent
+- Ensure all new code passes analyze_code_quality checks
+- No console warnings or errors
+
+## Final Deliverables
+1. Updated index.html with #github-status element
+2. Updated script.js with status update functions
+3. Updated styles.css with status element styling
+4. Updated README.md with accessibility feature documentation
+5. Clean preview.png showing the application
+6. All files passing code quality checks
