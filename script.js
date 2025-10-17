@@ -2,6 +2,7 @@
  * GitHub User Created Date Finder
  * Fetches GitHub user data and displays account creation date in YYYY-MM-DD UTC format
  * Round 2 Update: Added aria-live status updates for accessibility
+ * Round 3 Update: Added real-time character counter and username length warning
  */
 
 // Global variables
@@ -21,6 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cache DOM element references
     elements.form = document.getElementById('github-user-23f3004197');
     elements.usernameInput = document.getElementById('username');
+    elements.usernameCount = document.getElementById('username-count'); // NEW: Round 3
+    elements.usernameWarning = document.getElementById('username-warning'); // NEW: Round 3
     elements.submitBtn = document.getElementById('submit-btn');
     elements.btnText = document.getElementById('btn-text');
     elements.btnSpinner = document.getElementById('btn-spinner');
@@ -33,11 +36,33 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.userBio = document.getElementById('user-bio');
     elements.userBioContainer = document.getElementById('user-bio-container');
     elements.userProfileLink = document.getElementById('user-profile-link');
-    elements.githubStatus = document.getElementById('github-status'); // NEW: Round 2
+    elements.githubStatus = document.getElementById('github-status');
     
     // Add form submit event listener
     elements.form.addEventListener('submit', handleFormSubmit);
+
+    // NEW: Add input event listener for username character counter (Round 3)
+    elements.usernameInput.addEventListener('input', updateCharacterCount);
+
+    // NEW: Initialize character count on page load (Round 3)
+    updateCharacterCount();
 });
+
+/**
+ * NEW: Update character count and display warning if over 39 characters (Round 3)
+ */
+function updateCharacterCount() {
+    const currentLength = elements.usernameInput.value.length;
+    elements.usernameCount.textContent = `${currentLength} characters`;
+
+    if (currentLength > 39) {
+        elements.usernameWarning.classList.remove('d-none');
+        elements.usernameCount.classList.add('text-danger');
+    } else {
+        elements.usernameWarning.classList.add('d-none');
+        elements.usernameCount.classList.remove('text-danger');
+    }
+}
 
 /**
  * Handle form submission
@@ -61,7 +86,7 @@ async function handleFormSubmit(event) {
     // Set loading state
     setLoadingState(true);
     
-    // NEW: Show status that lookup has started
+    // Show status that lookup has started
     updateStatus(`Looking up GitHub user "${username}"...`, 'info');
     
     try {
@@ -71,13 +96,13 @@ async function handleFormSubmit(event) {
         // Display the results
         displayUserData(userData);
         
-        // NEW: Show success status
+        // Show success status
         updateStatus(`Successfully found user "${username}"`, 'success');
         
         // Auto-hide success message after 3 seconds
         setTimeout(() => hideStatus(), 3000);
     } catch (error) {
-        // NEW: Show error status
+        // Show error status
         updateStatus(`Failed to find user: ${error.message}`, 'danger');
         
         showError(error.message);
@@ -194,7 +219,7 @@ function displayUserData(userData) {
 }
 
 /**
- * NEW: Update the status message for accessibility (Round 2)
+ * Update the status message for accessibility
  * This function updates the aria-live region to announce status changes to screen readers
  * @param {string} message - Status message to display
  * @param {string} type - Alert type: 'info', 'success', 'danger'
@@ -214,7 +239,7 @@ function updateStatus(message, type = 'info') {
 }
 
 /**
- * NEW: Hide the status message (Round 2)
+ * Hide the status message
  */
 function hideStatus() {
     const statusElement = elements.githubStatus;

@@ -1,256 +1,51 @@
-# PROJECT PLAN: GitHub User Created Date Fetcher - Round 2 Update
+### Architectural Vision
+The existing file structure (`index.html`, `script.js`, `styles.css`) will be maintained.
+- `index.html`: Will be modified to include the `username-count` element and a warning message element near the username input field.
+- `script.js`: Will be updated to include an event listener for the username input, logic for counting characters, updating the `username-count` element, and displaying/hiding the warning message.
+- `styles.css`: Will be updated to include styles for the warning message.
 
-## Update Mission Brief Analysis
-**New Requirements (Round 2):**
-1. Show an aria-live alert `#github-status` that reports when a lookup starts, succeeds, or fails
-2. The element with ID 'github-status' must have an aria-live attribute set to 'polite'
-3. There must be a script on the page that references 'github-status'
+### Component Strategy
+- **`index.html` modifications**:
+    - Locate the `div` containing the `username` input field.
+    - Inside this `div`, after the `input` element, add a `small` element with `id="username-count"` to display the character count.
+    - After the `username-count` element, add another `small` element with `id="username-warning"` to display the warning message when the character limit is exceeded. This element will initially be hidden.
 
-**Existing Functionality to Preserve:**
-- Form with ID `github-user-23f3004197` ✅
-- Element with ID `github-created-at` displaying date ✅
-- GitHub API fetching from `https://api.github.com/users/` ✅
-- YYYY-MM-DD UTC date format ✅
-- Token authentication support ✅
-- All existing UI/UX features ✅
+### Styling Strategy
+- **`styles.css` modifications**:
+    - Add a CSS class (e.g., `.text-danger`) for the warning message to make it red. Bootstrap already has `text-danger`, so I'll use that.
+    - Ensure the warning message is hidden by default using `d-none` from Bootstrap.
 
-## New Evaluation Criteria Compliance Checklist
-✅ **NEW Criterion 1**: Element with ID 'github-status' has aria-live attribute set to 'polite'
-✅ **NEW Criterion 2**: Script references 'github-status' and updates it with status messages
-✅ **EXISTING Criterion 1**: Form element with ID 'github-user-23f3004197' must exist
-✅ **EXISTING Criterion 2**: Element with ID 'github-created-at' must contain date text
-✅ **EXISTING Criterion 3**: Script must fetch from GitHub API
+### Logic & Interactivity
+- **`script.js` modifications**:
+    1.  **Get DOM Elements**:
+        - Get references to the `username` input field (`#username`).
+        - Get references to the `username-count` element (`#username-count`).
+        - Get references to the `username-warning` element (`#username-warning`).
+    2.  **Event Listener**:
+        - Add an `input` event listener to the `username` input field.
+    3.  **Character Counting Logic**:
+        - Inside the event listener, get the current value of the `username` input.
+        - Update the `textContent` of `username-count` with the current character length.
+    4.  **Warning Display Logic**:
+        - If the character length exceeds 39:
+            - Display the `username-warning` element (remove `d-none`).
+            - Add a class to `username-count` to make it red (e.g., `text-danger`).
+        - Otherwise:
+            - Hide the `username-warning` element (add `d-none`).
+            - Remove the red class from `username-count`.
+    5.  **Initial State**:
+        - On page load, initialize the character count and warning based on the initial (empty) input.
 
-## Architectural Changes
-
-### Modified Files
-1. **index.html** - Add `#github-status` element with proper ARIA attributes
-2. **script.js** - Add functions to update status messages, integrate with existing flow
-3. **styles.css** - Add styling for the status message element (optional enhancement)
-4. **README.md** - Update documentation to reflect new accessibility feature
-
-### No Changes Required
-- LICENSE (unchanged)
-- preview.png (will be regenerated)
-
-## Component Strategy - HTML Changes
-
-### New Element: #github-status
-**Location**: Between the form card and results section, or above the form
-**Markup**:
-```html
-<div id="github-status" 
-     class="alert alert-info" 
-     role="status" 
-     aria-live="polite" 
-     aria-atomic="true">
-</div>
-```
-
-**Rationale for Placement**:
-- Visually positioned so screen readers announce it appropriately
-- Use Bootstrap alert component for consistent styling
-- Initially hidden (d-none class) until there's a status to report
-
-**Accessibility Attributes**:
-- `aria-live="polite"`: Ensures screen readers announce changes without interrupting
-- `role="status"`: Indicates this is a status message
-- `aria-atomic="true"`: Announces the entire region when it updates
-
-## Styling Strategy - CSS Updates
-
-### Status Element Styling
-```css
-#github-status {
-    border-radius: 10px;
-    transition: all 0.3s ease;
-}
-
-#github-status.alert-info {
-    /* Loading state */
-    background-color: #cfe2ff;
-    border-color: #b6d4fe;
-}
-
-#github-status.alert-success {
-    /* Success state */
-    background-color: #d1e7dd;
-    border-color: #badbcc;
-}
-
-#github-status.alert-danger {
-    /* Error state */
-    background-color: #f8d7da;
-    border-color: #f5c2c7;
-}
-```
-
-**Design Decisions**:
-- Maintain consistency with existing card styling (border-radius)
-- Use Bootstrap's alert color scheme for familiarity
-- Add smooth transitions for professional feel
-
-## Logic & Interactivity Strategy - JavaScript Updates
-
-### 1. New DOM Element Reference
-Add to the `elements` object in DOMContentLoaded:
-```javascript
-elements.githubStatus = document.getElementById('github-status');
-```
-
-### 2. New Status Update Function
-```javascript
-/**
- * Update the status message for accessibility
- * @param {string} message - Status message to display
- * @param {string} type - Alert type: 'info', 'success', 'danger'
- */
-function updateStatus(message, type = 'info') {
-    const statusElement = elements.githubStatus;
-    
-    // Update message
-    statusElement.textContent = message;
-    
-    // Update styling
-    statusElement.className = `alert alert-${type}`;
-    
-    // Show the status element
-    statusElement.classList.remove('d-none');
-}
-
-/**
- * Hide the status message
- */
-function hideStatus() {
-    elements.githubStatus.classList.add('d-none');
-    elements.githubStatus.textContent = '';
-}
-```
-
-### 3. Integration Points in Existing Flow
-
-#### A. When Lookup Starts (in handleFormSubmit)
-**Location**: After validation, before API call
-**Code**:
-```javascript
-// Show status: lookup started
-updateStatus(`Looking up GitHub user "${username}"...`, 'info');
-```
-
-#### B. When Lookup Succeeds (in handleFormSubmit try block)
-**Location**: After displayUserData() call
-**Code**:
-```javascript
-// Show success status
-updateStatus(`Successfully found user "${username}"`, 'success');
-
-// Auto-hide success message after 3 seconds
-setTimeout(() => hideStatus(), 3000);
-```
-
-#### C. When Lookup Fails (in handleFormSubmit catch block)
-**Location**: In the catch block, before showError()
-**Code**:
-```javascript
-// Show error status
-updateStatus(`Failed to find user "${username}": ${error.message}`, 'danger');
-```
-
-### 4. Edge Cases & Status Messages
-
-| Scenario | Status Message | Type |
-|----------|----------------|------|
-| Lookup starts | "Looking up GitHub user '{username}'..." | info |
-| User found | "Successfully found user '{username}'" | success |
-| User not found (404) | "Failed to find user '{username}': User not found" | danger |
-| Rate limit (403) | "Failed to find user '{username}': Rate limit exceeded" | danger |
-| Network error | "Failed to find user '{username}': Network error" | danger |
-| Empty input | No status update (validation prevents submission) | - |
-
-### 5. Timing Considerations
-- **Start status**: Shown immediately when form is submitted
-- **Success status**: Shown immediately when data loads, auto-hides after 3s
-- **Error status**: Shown when error occurs, stays visible until next lookup
-
-## Accessibility Enhancement Benefits
-
-1. **Screen Reader Support**: Users with visual impairments will hear status updates
-2. **ARIA Live Regions**: Polite announcements don't interrupt current tasks
-3. **Status Clarity**: Clear feedback for all lookup states
-4. **Semantic HTML**: Proper use of role="status" for assistive technologies
-
-## Implementation Order
-
-1. ✅ **Review existing code** (Phase 1 - Complete)
-2. **Update index.html**:
-   - Add `#github-status` element with aria-live="polite"
-   - Position appropriately in layout
-3. **Update script.js**:
-   - Add `elements.githubStatus` reference
-   - Create `updateStatus()` function
-   - Create `hideStatus()` function
-   - Integrate status updates in `handleFormSubmit()`
-4. **Update styles.css**:
-   - Add status element styling (optional enhancement)
-5. **Test with run_and_preview_application**:
-   - Verify status messages appear correctly
-   - Test all three states (start, success, fail)
-   - Check console for errors
-6. **Update README.md**:
-   - Add section about accessibility features
-   - Document the new aria-live status updates
-7. **Final quality assurance**:
-   - Verify all existing functionality works
-   - Verify new evaluation criteria are met
-   - Run analyze_code_quality on all files
-
-## Testing Checklist
-
-### New Functionality
-- [ ] `#github-status` element exists in HTML
-- [ ] Element has `aria-live="polite"` attribute
-- [ ] Element has `role="status"` attribute
-- [ ] Script references `#github-status` by ID
-- [ ] Status shows "Looking up..." when search starts
-- [ ] Status shows "Successfully found..." when user is found
-- [ ] Status shows "Failed to find..." when error occurs
-- [ ] Success message auto-hides after 3 seconds
-
-### Existing Functionality Regression Tests
-- [ ] Form ID is still `github-user-23f3004197`
-- [ ] Date element ID is still `github-created-at`
-- [ ] Date format is still YYYY-MM-DD UTC
-- [ ] GitHub API URL is still correct
-- [ ] Token authentication still works
-- [ ] All error handling still works
-- [ ] UI/UX is still smooth and professional
-
-## Success Criteria Verification
-
-| New Criterion | Implementation | Verification Method |
-|---------------|----------------|---------------------|
-| Element ID 'github-status' exists | `<div id="github-status">` in HTML | analyze_code_quality, visual inspection |
-| Has aria-live="polite" | `aria-live="polite"` attribute | analyze_code_quality, HTML validation |
-| Script references 'github-status' | `document.getElementById('github-status')` in JS | Code search, analyze_code_quality |
-| Status updates on lookup start | `updateStatus()` call in handleFormSubmit | Manual testing, preview |
-| Status updates on success | `updateStatus()` call after data display | Manual testing, preview |
-| Status updates on failure | `updateStatus()` call in catch block | Manual testing with invalid username |
-
-## Deployment URLs
-- **Repository**: `https://github.com/mayanklearns/ai-agent-github-user-created-c3d4eff`
-- **Live Demo**: `https://mayanklearns.github.io/ai-agent-github-user-created-c3d4eff/`
-
-## Code Quality Standards
-- Maintain existing code style and conventions
-- Add clear comments for new functions
-- Keep variable naming consistent
-- Ensure all new code passes analyze_code_quality checks
-- No console warnings or errors
-
-## Final Deliverables
-1. Updated index.html with #github-status element
-2. Updated script.js with status update functions
-3. Updated styles.css with status element styling
-4. Updated README.md with accessibility feature documentation
-5. Clean preview.png showing the application
-6. All files passing code quality checks
+### Evaluation Criteria Compliance
+-   **There is an element with ID 'username-count' that updates in real-time as the user types.**
+    -   `index.html` will have `<small id="username-count"></small>`.
+    -   `script.js` will have an `input` event listener on the username field that updates `username-count.textContent`.
+-   **A warning is displayed if the username exceeds 39 characters.**
+    -   `index.html` will have `<small id="username-warning" class="text-danger d-none">Username exceeds 39 characters!</small>`.
+    -   `script.js` will check `username.value.length > 39` and toggle the `d-none` class on `username-warning`.
+-   **The page still contains a script referencing 'username-count'.**
+    -   The `script.js` will contain the logic for `username-count`.
+-   **Existing functionality remains intact.**
+    -   The changes will be isolated to the character counter and warning, not interfering with the existing GitHub API fetch logic.
+-   **`README.md` is updated to reflect any new features and uses the provided URLs.**
+    -   After implementing the code, I will update `README.md` with a new feature description and the provided URLs.

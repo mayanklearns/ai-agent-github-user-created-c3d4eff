@@ -11,8 +11,10 @@ A sleek, Bootstrap 5-powered web application that fetches GitHub user informatio
 - 🔐 **Optional Authentication**: Support for GitHub personal access tokens via URL parameter to increase API rate limits
 - ⚡ **Real-time Validation**: Instant feedback for invalid usernames or API errors
 - 📱 **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
+- 🔢 **Live Character Counter**: Displays the current length of the username as you type (NEW)
+- ⚠️ **Username Length Warning**: Alerts the user if the username exceeds 39 characters (NEW)
 
-## Accessibility Features (NEW)
+## Accessibility Features
 
 This application includes comprehensive accessibility features:
 
@@ -38,9 +40,11 @@ This application includes comprehensive accessibility features:
 
 1. Open the application in your web browser
 2. Enter a GitHub username (e.g., `octocat`)
-3. Click "Fetch User Info" or press Enter
-4. View the account creation date and additional user information
-5. **NEW**: Status messages will appear above the results, announcing the lookup progress
+3. Observe the live character counter below the input field.
+4. If the username exceeds 39 characters, a warning will appear.
+5. Click "Fetch User Info" or press Enter
+6. View the account creation date and additional user information
+7. Status messages will appear above the results, announcing the lookup progress
 
 ### With Personal Access Token (Optional)
 
@@ -75,7 +79,7 @@ The account creation date is displayed in an element with ID `github-created-at`
 <p id="github-created-at"></p>
 ```
 
-#### Status Updates (NEW)
+#### Status Updates
 Real-time status messages are displayed in an ARIA live region:
 ```html
 <div id="github-status" aria-live="polite" role="status" aria-atomic="true"></div>
@@ -91,6 +95,18 @@ updateStatus(`Successfully found user "${username}"`, 'success');
 
 // When failed
 updateStatus(`Failed to find user: ${error.message}`, 'danger');
+```
+
+#### Character Counter (NEW)
+The character count is displayed in an element with ID `username-count`:
+```html
+<small id="username-count" class="form-text text-muted"></small>
+```
+
+#### Username Warning (NEW)
+The warning message for exceeding 39 characters is displayed in an element with ID `username-warning`:
+```html
+<small id="username-warning" class="form-text text-danger d-none">Username exceeds 39 characters!</small>
 ```
 
 #### API Integration
@@ -182,19 +198,15 @@ This project is deployed using GitHub Pages. Any changes pushed to the `main` br
 
 ![Application Preview](preview.png)
 
-## What's New in Round 2
+## What's New in Round 3
 
-### Accessibility Enhancements
-- Added ARIA live region (`#github-status`) for real-time status announcements
-- Implemented polite status updates that don't interrupt screen reader users
-- Status messages for lookup start, success, and error states
-- Auto-hiding success messages after 3 seconds
+### New Features
+- **Live Character Counter**: An element with ID `username-count` now updates in real-time, displaying the current length of the username as the user types.
+- **Username Length Warning**: A warning message is displayed via an element with ID `username-warning` if the entered username exceeds 39 characters. The character count also turns red when the limit is exceeded.
 
 ### Technical Improvements
-- Enhanced JavaScript with `updateStatus()` and `hideStatus()` functions
-- Proper ARIA attributes for better assistive technology support
-- Smooth animations for status message appearance
-- Color-coded status messages (info, success, danger)
+- Added `updateCharacterCount()` function in `script.js` to handle character counting and warning display.
+- Integrated `input` event listener on the username field for real-time updates.
 
 ## Contributing
 
